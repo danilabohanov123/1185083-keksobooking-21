@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Данила Боханов](https://up.htmlacademy.ru/javascript/21/user/1185083).
-* Наставник: `Неизвестно`.
+* Наставник: [Артем Макаров](https://up.htmlacademy.ru/javascript/21/user/429879).
 
 ---
 
