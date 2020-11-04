@@ -1,124 +1,108 @@
 "use strict";
 
-const ObjNum = 8;
+const OBJECTS_NUMBER = 8;
+
 const typesList = [`palace`, `flat`, `house`, `bungalow`];
 const featuresList = [`wifi`, `dishwasher`, `parking`, `washer`, `elevator`, `conditioner`];
-const hotelphotos = [1, 2, 3];
+const hotelPhotos = [1, 2, 3];
 const timesList = [`12:00`, `13:00`, `14:00`];
 
-const genRandInt = (minNum, maxNum) => {
-  return minNum + Math.round((Math.random() * (maxNum - minNum)));
+const generateRandomInteger = (minNumber, maxNumber) => {
+  return minNumber + Math.round((Math.random() * (maxNumber - minNumber)));
 };
 
-const shuffle = (arr) => {
-  const usedInd = [];
-  for (let i = 0; i < arr.length; i++) {
-    usedInd.push(false);
+const shuffleList = (itemsList) => {
+  const usedIndexes = [];
+  for (let i = 0; i < itemsList.length; i++) {
+    usedIndexes.push(false);
   }
-  const shuffledArr = [];
-  for (let i = 0; i < arr.length; i++) {
-    const nextInd = genRandInt(1, arr.length - i);
+  const shuffledItemsList = [];
+  for (let i = 0; i < itemsList.length; i++) {
+    const nextIndex = generateRandomInteger(1, itemsList.length - i);
     let falseCounter = 0;
-    for (let j = 0; j < usedInd.length; j++) {
-      if (!usedInd[j]) {
+    for (let j = 0; j < usedIndexes.length; j++) {
+      if (!usedIndexes[j]) {
         falseCounter++;
-        if (falseCounter === nextInd) {
-          usedInd[j] = true;
-          shuffledArr.push(arr[j]);
+        if (falseCounter === nextIndex) {
+          usedIndexes[j] = true;
+          shuffledItemsList.push(itemsList[j]);
         }
       }
     }
   }
-  return shuffledArr;
+  return shuffledItemsList;
 };
 
 const listIndexes = [];
-for (let i = 1; i <= ObjNum; i++) {
+for (let i = 1; i <= OBJECTS_NUMBER; i++) {
   listIndexes.push(i);
 }
 
-const listAvatarIndexes = shuffle(listIndexes);
+const listAvatarIndexes = shuffleList(listIndexes);
 
-const genAuthor = (avatar) => {
-  return {avatar: avatar};
-};
-
-const genOffer = (title, address, price, type, rooms, guests, checkin, checkout, features,
+const generateOffer = (title, address, price, type, rooms, guests, checkin, checkout, features,
     description, photos) => {
   return {title: title, address: address, price: price, type: type, rooms: rooms, guests: guests,
     checkin: checkin, checkout: checkout, features: features, description: description, photos: photos};
 };
 
-const genAvatar = (ind) => {
-  return `img/avatars/user0` + listAvatarIndexes[ind] + `.png`;
-};
-
-const genTitle = (titleText) => {
-  return titleText;
-};
-
-const genAdress = (x, y) => {
-  return x + `, ` + y;
-};
-
-const genPrice = (minNumber, maxNumber) => {
-  return genRandInt(minNumber, maxNumber);
-};
-
-const genTypes = () => {
-  const typeInd = genRandInt(0, typesList.length - 1);
+const generateTypes = () => {
+  const typeInd = generateRandomInteger(0, typesList.length - 1);
   return typesList[typeInd];
 };
 
-const genRooms = (roomsNumber) => {
+const generateRooms = (roomsNumber) => {
   return roomsNumber;
 };
 
-const genGuests = (guestsNumber) => {
+const generateGuests = (guestsNumber) => {
   return guestsNumber;
 };
 
-const genCheckin = () => {
-  return timesList[genRandInt(0, typesList.length - 1)];
+const generateCheckin = () => {
+  return timesList[generateRandomInteger(0, typesList.length - 1)];
 };
 
-const genCheckout = () => {
-  return timesList[genRandInt(0, typesList.length - 1)];
+const generateCheckout = () => {
+  return timesList[generateRandomInteger(0, typesList.length - 1)];
 };
 
-const genFeatures = () => {
-  const hotelFeaturesSize = genRandInt(1, featuresList.length);
-  const hotelFeatures = shuffle(featuresList).slice(0, hotelFeaturesSize);
-  return hotelFeatures;
+const generateRandomSubarray = (arrayItems) => {
+  const randomSubarraySize = generateRandomInteger(1, arrayItems.length);
+  const randomSubarray = shuffleList(arrayItems).slice(0, randomSubarraySize);
+  return randomSubarray;
 };
 
-const genDescription = (descriptionText) => {
+const generateFeatures = () => {
+  return generateRandomSubarray(featuresList);
+};
+
+const generateDescription = (descriptionText) => {
   return descriptionText;
 };
 
-const genPhotos = () => {
-  const photoesListSize = genRandInt(1, hotelphotos.length);
-  const photoesList = shuffle(typesList).slice(0, photoesListSize);
-  return photoesList;
+const generatePhotos = () => {
+  return generateRandomSubarray(hotelPhotos);
 };
 
-const genLocation = () => {
-  return {x: genRandInt(0, 100), y: genRandInt(130, 630)};
+const generateLocation = () => {
+  return {x: generateRandomInteger(0, 100), y: generateRandomInteger(130, 630)};
 };
 
-const genAnnouncement = (ind) => {
-  const author = genAuthor(genAvatar(ind));
-  const location = genLocation();
-  const offer = genOffer(genTitle(`Title`), genAdress(location.x, location.y), genPrice(100, 10000), genTypes(),
-      genRooms(genRandInt(1, 10)), genGuests(genRandInt(1, 7)), genCheckin(), genCheckout(), genFeatures(),
-      genDescription(`Some words about hotel.`), genPhotos());
+const generateAnnouncement = (ind) => {
+  const author = {avatar: `img/avatars/user0` + listAvatarIndexes[ind] + `.png`};
+  const location = generateLocation();
+  const offer = generateOffer(`Title`, location.x + `, ` + location.y,
+      generateRandomInteger(100, 10000), generateTypes(), generateRooms(generateRandomInteger(1, 10)),
+      generateGuests(generateRandomInteger(1, 7)), generateCheckin(), generateCheckout(),
+      generateFeatures(), generateDescription(`Some words about hotel.`), generatePhotos());
   return {author: author, offer: offer, location: location};
 };
 
 const announcementsList = [];
 
-for (let i = 0; i < ObjNum; i++) {
-  announcementsList.push(genAnnouncement(i));
+for (let i = 0; i < OBJECTS_NUMBER; i++) {
+  announcementsList.push(generateAnnouncement(i));
 }
 
 const map = document.querySelector(`.map`);
@@ -132,7 +116,7 @@ for (const announcement of announcementsList) {
   pin.style = `left: ` + announcement.location.x + `%; top: ` + announcement.location.y + `px; transform: translate(-50%, -50%);`;
   const pinImage = pin.querySelector(`img`);
   pinImage.src = announcement.author.avatar;
-  pinImage.scr = announcement.offer.title;
+  pinImage.alt = announcement.offer.title;
   fragment.appendChild(pin);
 }
 
