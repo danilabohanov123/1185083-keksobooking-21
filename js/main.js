@@ -1,11 +1,25 @@
 "use strict";
 
-const OBJECTS_NUMBER = 8;
+const HOTELS_NUMBER = 8;
 
-const typesList = [`palace`, `flat`, `house`, `bungalow`];
-const featuresList = [`wifi`, `dishwasher`, `parking`, `washer`, `elevator`, `conditioner`];
+const types = [`palace`, `flat`, `house`, `bungalow`];
+const features = [`wifi`, `dishwasher`, `parking`, `washer`, `elevator`, `conditioner`];
 const hotelPhotos = [1, 2, 3];
-const timesList = [`12:00`, `13:00`, `14:00`];
+const times = [`12:00`, `13:00`, `14:00`];
+const EnglisHousingToRussian = {
+  flat: `Квартира`,
+  bungalow: `Бунгало`,
+  house: `Дом`,
+  palace: `Дворец`
+};
+const EnglisfeatureToRussian = {
+  wifi: `вай-фай`,
+  dishwasher: `посудомойка`,
+  parking: `parking`,
+  washer: `стиральная машина`,
+  elevator: `лифт`,
+  conditioner: `кондиционер`
+};
 
 const generateRandomInteger = (minNumber, maxNumber) => {
   return minNumber + Math.round((Math.random() * (maxNumber - minNumber)));
@@ -34,7 +48,7 @@ const shuffleList = (itemsList) => {
 };
 
 const listIndexes = [];
-for (let i = 1; i <= OBJECTS_NUMBER; i++) {
+for (let i = 1; i <= HOTELS_NUMBER; i++) {
   listIndexes.push(i);
 }
 
@@ -46,25 +60,17 @@ const generateOffer = (title, address, price, type, rooms, guests, checkin, chec
     checkin: checkin, checkout: checkout, features: features, description: description, photos: photos};
 };
 
-const generateTypes = () => {
-  const typeInd = generateRandomInteger(0, typesList.length - 1);
-  return typesList[typeInd];
-};
-
-const generateRooms = (roomsNumber) => {
-  return roomsNumber;
-};
-
-const generateGuests = (guestsNumber) => {
-  return guestsNumber;
+const generateType = () => {
+  const typeInd = generateRandomInteger(0, types.length - 1);
+  return types[typeInd];
 };
 
 const generateCheckin = () => {
-  return timesList[generateRandomInteger(0, typesList.length - 1)];
+  return times[generateRandomInteger(0, types.length - 1)];
 };
 
 const generateCheckout = () => {
-  return timesList[generateRandomInteger(0, typesList.length - 1)];
+  return times[generateRandomInteger(0, types.length - 1)];
 };
 
 const generateRandomSubarray = (arrayItems) => {
@@ -74,7 +80,7 @@ const generateRandomSubarray = (arrayItems) => {
 };
 
 const generateFeatures = () => {
-  return generateRandomSubarray(featuresList);
+  return generateRandomSubarray(features);
 };
 
 const generateDescription = (descriptionText) => {
@@ -82,7 +88,12 @@ const generateDescription = (descriptionText) => {
 };
 
 const generatePhotos = () => {
-  return generateRandomSubarray(hotelPhotos);
+  const RandomSubarrayPhotos = generateRandomSubarray(hotelPhotos);
+  for (let i = 0; i < RandomSubarrayPhotos.length; i++) {
+    RandomSubarrayPhotos[i] = `http://o0.github.io/assets/images/tokyo/hotel` + 
+      RandomSubarrayPhotos[i] + `.jpg`;
+  }
+  return RandomSubarrayPhotos;
 };
 
 const generateLocation = () => {
@@ -93,15 +104,15 @@ const generateAnnouncement = (ind) => {
   const author = {avatar: `img/avatars/user0` + listAvatarIndexes[ind] + `.png`};
   const location = generateLocation();
   const offer = generateOffer(`Title`, location.x + `, ` + location.y,
-      generateRandomInteger(100, 10000), generateTypes(), generateRooms(generateRandomInteger(1, 10)),
-      generateGuests(generateRandomInteger(1, 7)), generateCheckin(), generateCheckout(),
+      generateRandomInteger(100, 10000), generateType(), generateRandomInteger(1, 3),
+      generateRandomInteger(1, 6), generateCheckin(), generateCheckout(),
       generateFeatures(), generateDescription(`Some words about hotel.`), generatePhotos());
   return {author: author, offer: offer, location: location};
 };
 
 const announcementsList = [];
 
-for (let i = 0; i < OBJECTS_NUMBER; i++) {
+for (let i = 0; i < HOTELS_NUMBER; i++) {
   announcementsList.push(generateAnnouncement(i));
 }
 
@@ -109,16 +120,54 @@ const map = document.querySelector(`.map`);
 map.classList.remove(`map--faded`);
 
 const pinTemplate = document.querySelector(`#pin`).content.querySelector(`button`);
-const fragment = document.createDocumentFragment();
+const fragmentPins = document.createDocumentFragment();
+const cardTemplate = document.querySelector(`#card`).content.querySelector(`article`);
+const fragmnetCards = document.createDocumentFragment();
 
 for (const announcement of announcementsList) {
   const pin = pinTemplate.cloneNode(true);
-  pin.style = `left: ` + announcement.location.x + `%; top: ` + announcement.location.y + `px; transform: translate(-50%, -50%);`;
+  pin.style = `left: ` + announcement.location.x + `%; top: ` + 
+    announcement.location.y + `px; transform: translate(-50%, -50%);`;
   const pinImage = pin.querySelector(`img`);
   pinImage.src = announcement.author.avatar;
   pinImage.alt = announcement.offer.title;
-  fragment.appendChild(pin);
+  fragmentPins.appendChild(pin);
+  
+  const card = cardTemplate.cloneNode(true);
+  const popupTitle = card.querySelector(`.popup__title`);
+  popupTitle.textContent = announcement.offer.title;
+  const popupTextAddress = card.querySelector(`.popup__text--address`);
+  popupTextAddress.textContent = announcement.offer.address;
+  const popupTextPrice = card.querySelector(`.popup__text--price`);
+  popupTextPrice.textContent = announcement.offer.price + `₽/ночь`;
+  const popupType = card.querySelector(`.popup__type`);
+  popupType.textContent = EnglisHousingToRussian[announcement.offer.type];
+  const popupTextCapacity = card.querySelector(`.popup__text--capacity`);
+  popupTextCapacity.textContent = announcement.offer.rooms + ` комнаты для ` + 
+    announcement.offer.guests + ` гостей`;
+  const popupTextTime = card.querySelector(`.popup__text--time`);
+  popupTextTime.textContent = `Заезд после ` + announcement.offer.checkin + 
+    `, выезд до ` + announcement.offer.checkout;
+  const popupFeatures = card.querySelector(`.popup__features`);
+  popupFeatures.textContent = `Удобства: ` + EnglisfeatureToRussian[announcement.offer.features[0]];
+  for (let i = 1; i < announcement.offer.length; i++) {
+    popupFeatures.textContent += `, ` + EnglisfeatureToRussian[announcement.offer.features[i]];
+  }
+  const popupDescription = card.querySelector(`.popup__description`);
+  popupDescription.textContent = announcement.offer.description;
+  const popupPhotos = card.querySelector(`.popup__photos`);
+  const popupPhoto = popupPhotos.querySelector(`.popup__photo`);
+  popupPhoto.src = announcement.offer.photos[0];
+  for (let i = 1; i < announcement.offer.photos.length; i++) {
+    const newPopupPhoto = popupPhoto.cloneNode(true);
+    newPopupPhoto.src = announcement.offer.photos[i];
+    popupPhoto.appendChild(newPopupPhoto);
+  }
+  const popupAvatar = card.querySelector(`.popup__avatar`);
+  popupAvatar.src = announcement.author.avatar;
+  fragmnetCards.appendChild(card);
 }
 
 const mapPins = map.querySelector(`.map__pins`);
-mapPins.appendChild(fragment);
+mapPins.appendChild(fragmentPins);
+mapPins.appendChild(fragmnetCards);
