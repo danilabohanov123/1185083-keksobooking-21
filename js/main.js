@@ -1,11 +1,11 @@
 "use strict";
 
-const HOTELS_NUMBER = 8;
+const OBJECTS_NUMBER = 8;
 
-const types = [`palace`, `flat`, `house`, `bungalow`];
-const features = [`wifi`, `dishwasher`, `parking`, `washer`, `elevator`, `conditioner`];
+const hotelTypes = [`palace`, `flat`, `house`, `bungalow`];
+const hotelFeatures = [`wifi`, `dishwasher`, `parking`, `washer`, `elevator`, `conditioner`];
 const hotelPhotos = [1, 2, 3];
-const times = [`12:00`, `13:00`, `14:00`];
+const hotelTimes = [`12:00`, `13:00`, `14:00`];
 const EnglisHousingToRussian = {
   flat: `Квартира`,
   bungalow: `Бунгало`,
@@ -15,7 +15,7 @@ const EnglisHousingToRussian = {
 const EnglisfeatureToRussian = {
   wifi: `вай-фай`,
   dishwasher: `посудомойка`,
-  parking: `parking`,
+  parking: `парковка`,
   washer: `стиральная машина`,
   elevator: `лифт`,
   conditioner: `кондиционер`
@@ -48,7 +48,7 @@ const shuffleList = (itemsList) => {
 };
 
 const listIndexes = [];
-for (let i = 1; i <= HOTELS_NUMBER; i++) {
+for (let i = 1; i <= OBJECTS_NUMBER; i++) {
   listIndexes.push(i);
 }
 
@@ -60,17 +60,25 @@ const generateOffer = (title, address, price, type, rooms, guests, checkin, chec
     checkin: checkin, checkout: checkout, features: features, description: description, photos: photos};
 };
 
-const generateType = () => {
-  const typeInd = generateRandomInteger(0, types.length - 1);
-  return types[typeInd];
+const generateTypes = () => {
+  const typeInd = generateRandomInteger(0, hotelTypes.length - 1);
+  return hotelTypes[typeInd];
+};
+
+const generateRooms = (roomsNumber) => {
+  return roomsNumber;
+};
+
+const generateGuests = (guestsNumber) => {
+  return guestsNumber;
 };
 
 const generateCheckin = () => {
-  return times[generateRandomInteger(0, types.length - 1)];
+  return hotelTimes[generateRandomInteger(0, hotelTypes.length - 1)];
 };
 
 const generateCheckout = () => {
-  return times[generateRandomInteger(0, types.length - 1)];
+  return hotelTimes[generateRandomInteger(0, hotelTypes.length - 1)];
 };
 
 const generateRandomSubarray = (arrayItems) => {
@@ -80,7 +88,7 @@ const generateRandomSubarray = (arrayItems) => {
 };
 
 const generateFeatures = () => {
-  return generateRandomSubarray(features);
+  return generateRandomSubarray(hotelFeatures);
 };
 
 const generateDescription = (descriptionText) => {
@@ -90,8 +98,7 @@ const generateDescription = (descriptionText) => {
 const generatePhotos = () => {
   const RandomSubarrayPhotos = generateRandomSubarray(hotelPhotos);
   for (let i = 0; i < RandomSubarrayPhotos.length; i++) {
-    RandomSubarrayPhotos[i] = `http://o0.github.io/assets/images/tokyo/hotel` + 
-      RandomSubarrayPhotos[i] + `.jpg`;
+    RandomSubarrayPhotos[i] = `http://o0.github.io/assets/images/tokyo/hotel` + RandomSubarrayPhotos[i] + `.jpg`;
   }
   return RandomSubarrayPhotos;
 };
@@ -104,15 +111,15 @@ const generateAnnouncement = (ind) => {
   const author = {avatar: `img/avatars/user0` + listAvatarIndexes[ind] + `.png`};
   const location = generateLocation();
   const offer = generateOffer(`Title`, location.x + `, ` + location.y,
-      generateRandomInteger(100, 10000), generateType(), generateRandomInteger(1, 3),
-      generateRandomInteger(1, 6), generateCheckin(), generateCheckout(),
+      generateRandomInteger(100, 10000), generateTypes(), generateRooms(generateRandomInteger(1, 10)),
+      generateGuests(generateRandomInteger(1, 7)), generateCheckin(), generateCheckout(),
       generateFeatures(), generateDescription(`Some words about hotel.`), generatePhotos());
   return {author: author, offer: offer, location: location};
 };
 
 const announcementsList = [];
 
-for (let i = 0; i < HOTELS_NUMBER; i++) {
+for (let i = 0; i < OBJECTS_NUMBER; i++) {
   announcementsList.push(generateAnnouncement(i));
 }
 
@@ -126,13 +133,13 @@ const fragmnetCards = document.createDocumentFragment();
 
 for (const announcement of announcementsList) {
   const pin = pinTemplate.cloneNode(true);
-  pin.style = `left: ` + announcement.location.x + `%; top: ` + 
+  pin.style = `left: ` + announcement.location.x + `%; top: ` +
     announcement.location.y + `px; transform: translate(-50%, -50%);`;
   const pinImage = pin.querySelector(`img`);
   pinImage.src = announcement.author.avatar;
   pinImage.alt = announcement.offer.title;
   fragmentPins.appendChild(pin);
-  
+
   const card = cardTemplate.cloneNode(true);
   const popupTitle = card.querySelector(`.popup__title`);
   popupTitle.textContent = announcement.offer.title;
@@ -143,14 +150,14 @@ for (const announcement of announcementsList) {
   const popupType = card.querySelector(`.popup__type`);
   popupType.textContent = EnglisHousingToRussian[announcement.offer.type];
   const popupTextCapacity = card.querySelector(`.popup__text--capacity`);
-  popupTextCapacity.textContent = announcement.offer.rooms + ` комнаты для ` + 
+  popupTextCapacity.textContent = announcement.offer.rooms + ` комнаты для ` +
     announcement.offer.guests + ` гостей`;
   const popupTextTime = card.querySelector(`.popup__text--time`);
-  popupTextTime.textContent = `Заезд после ` + announcement.offer.checkin + 
+  popupTextTime.textContent = `Заезд после ` + announcement.offer.checkin +
     `, выезд до ` + announcement.offer.checkout;
   const popupFeatures = card.querySelector(`.popup__features`);
   popupFeatures.textContent = `Удобства: ` + EnglisfeatureToRussian[announcement.offer.features[0]];
-  for (let i = 1; i < announcement.offer.length; i++) {
+  for (let i = 1; i < announcement.offer.features.length; i++) {
     popupFeatures.textContent += `, ` + EnglisfeatureToRussian[announcement.offer.features[i]];
   }
   const popupDescription = card.querySelector(`.popup__description`);
@@ -161,7 +168,7 @@ for (const announcement of announcementsList) {
   for (let i = 1; i < announcement.offer.photos.length; i++) {
     const newPopupPhoto = popupPhoto.cloneNode(true);
     newPopupPhoto.src = announcement.offer.photos[i];
-    popupPhoto.appendChild(newPopupPhoto);
+    popupPhotos.appendChild(newPopupPhoto);
   }
   const popupAvatar = card.querySelector(`.popup__avatar`);
   popupAvatar.src = announcement.author.avatar;
