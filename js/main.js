@@ -177,4 +177,5 @@ for (const announcement of announcementsList) {
 
 const mapPins = map.querySelector(`.map__pins`);
 mapPins.appendChild(fragmentPins);
-mapPins.appendChild(fragmnetCards);
+const mapFiltersContainer = map.querySelector(`.map__filters-container`);
+map.insertBefore(fragmnetCards, mapFiltersContainer);
