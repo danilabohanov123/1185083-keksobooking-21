@@ -1,25 +1,28 @@
 "use strict";
 
 const OBJECTS_NUMBER = 8;
+/* const PIN_TRIANGLE_WIDTH = 10;
+const PIN_TRIANGLE_HEIGHT = 22;*/
 
 const hotelTypes = [`palace`, `flat`, `house`, `bungalow`];
 const hotelFeatures = [`wifi`, `dishwasher`, `parking`, `washer`, `elevator`, `conditioner`];
 const hotelPhotos = [1, 2, 3];
 const hotelTimes = [`12:00`, `13:00`, `14:00`];
-const EnglisHousingToRussian = {
+/* const EnglisHousingToRussian = {
   flat: `Квартира`,
   bungalow: `Бунгало`,
   house: `Дом`,
   palace: `Дворец`
-};
-const EnglisfeatureToRussian = {
+};*/
+
+/* const EnglisfeatureToRussian = {
   wifi: `вай-фай`,
   dishwasher: `посудомойка`,
   parking: `парковка`,
   washer: `стиральная машина`,
   elevator: `лифт`,
   conditioner: `кондиционер`
-};
+};*/
 
 const generateRandomInteger = (minNumber, maxNumber) => {
   return minNumber + Math.round((Math.random() * (maxNumber - minNumber)));
@@ -117,16 +120,155 @@ const generateAnnouncement = (ind) => {
   return {author: author, offer: offer, location: location};
 };
 
+const adForm = document.querySelector(`.ad-form`);
+const adFormFieldsets = adForm.querySelectorAll(`fieldset`);
+const map = document.querySelector(`.map`);
+const mapFilters = map.querySelector(`.map__filters`);
+const mapFiltersFieldsets = mapFilters.querySelectorAll(`fieldset`);
+const mapFiltersSelects = mapFilters.querySelectorAll(`select`);
+
+const disableFormFieldsets = (formFieldsets) => {
+  for (const formFieldset of formFieldsets) {
+    formFieldset.disabled = true;
+  }
+};
+
+const enableFormFieldsets = (formFieldsets) => {
+  for (const formFieldset of formFieldsets) {
+    formFieldset.disabled = false;
+  }
+};
+
+let isEnableStatus = false;
+
+const makeDisableStatus = () => {
+  disableFormFieldsets(adFormFieldsets);
+  disableFormFieldsets(mapFiltersFieldsets);
+  disableFormFieldsets(mapFiltersSelects);
+};
+
+const makeEnableStatus = () => {
+  map.classList.remove(`map--faded`);
+  adForm.classList.remove(`ad-form--disabled`);
+  enableFormFieldsets(adFormFieldsets);
+  enableFormFieldsets(mapFiltersFieldsets);
+  enableFormFieldsets(mapFiltersSelects);
+};
+
+const onMainPinMousedownLeft = function (evt) {
+  if (evt.which === 1 && !isEnableStatus) {
+    makeEnableStatus();
+    isEnableStatus = true;
+  }
+};
+
+const onMainPinKeydownEnter = function (evt) {
+  if (evt.keyCode === 13 && !isEnableStatus) {
+    makeEnableStatus();
+    isEnableStatus = true;
+  }
+};
+
+const getPosition = (pin) => {
+  const positionX = pin.offsetLeft + Math.floor(pin.offsetWidth / 2);
+  const positionY = pin.offsetTop + Math.floor(pin.offsetHeight / 2);
+  return positionX + `, ` + positionY;
+};
+
+const adFormTitle = adForm.querySelector(`#title`);
+const adFormRoomsNumber = adForm.querySelector(`#room_number`);
+const adFormCapacity = adForm.querySelector(`#capacity`);
+const adFormType = adForm.querySelector(`#type`);
+const adFormPrice = adForm.querySelector(`#price`);
+const adFormTimein = adForm.querySelector(`#timein`);
+const adFormTimeout = adForm.querySelector(`#timeout`);
+const adFormAvatar = adForm.querySelector(`#avatar`);
+const adFormImages = adForm.querySelector(`#images`);
+
+const checkGuestsNumber = () => {
+  if ((adFormRoomsNumber.options[0].selected && !adFormCapacity.options[2].selected) ||
+    (adFormRoomsNumber.options[1].selected && !adFormCapacity.options[1].selected && !adFormCapacity.options[2].selected) ||
+    adFormRoomsNumber.options[2].selected && adFormCapacity.options[3].selected ||
+    adFormRoomsNumber.options[3].selected && !adFormCapacity.options[3].selected) {
+    adFormCapacity.setCustomValidity(`Неподходящее число гостей`);
+  } else {
+    adFormCapacity.setCustomValidity(``);
+  }
+  adFormCapacity.reportValidity();
+};
+
+const checkTitle = () => {
+  if (adFormTitle.validity.tooShort) {
+    adFormTitle.setCustomValidity(`Слишком короткий заголовок`);
+  } else if (adFormTitle.validity.tooLong) {
+    adFormTitle.setCustomValidity(`Слишком длинный заголовок`);
+  } else {
+    adFormTitle.setCustomValidity(``);
+  }
+  adFormTitle.reportValidity();
+};
+
+const checkPrice = () => {
+  if (adFormType.value === `bungalow`) {
+    adFormPrice.placeholder = 0;
+  } else if (adFormType.value === `flat`) {
+    adFormPrice.placeholder = 1000;
+  } else if (adFormType.value === `house`) {
+    adFormPrice.placeholder = 5000;
+  } else {
+    adFormPrice.placeholder = 10000;
+  }
+  if ((adFormType.value === `flat` && adFormPrice.value < 1000) ||
+  (adFormType.value === `house` && adFormPrice.value < 5000) ||
+  (adFormType.value === `palace` && adFormPrice.value < 10000)) {
+    adFormPrice.setCustomValidity(`Слишком малая цена для данного типа жилья`);
+  } else {
+    adFormPrice.setCustomValidity(``);
+  }
+  adFormPrice.reportValidity();
+};
+
+const syncTimein = () => {
+  for (let i = 0; i < 3; i++) {
+    if (adFormTimeout.options[i].selected) {
+      adFormTimein.options[i].selected = true;
+    }
+  }
+};
+
+const syncTimeout = () => {
+  for (let i = 0; i < 3; i++) {
+    if (adFormTimein.options[i].selected) {
+      adFormTimeout.options[i].selected = true;
+    }
+  }
+};
+
+const checkImageFile = (imageInput) => {
+  const fileFormat = imageInput.value.split(`.`)[1];
+  if (fileFormat !== `jpeg` && fileFormat !== `png`) {
+    imageInput.setCustomValidity(`Неверный формат введённого изображения`);
+  } else {
+    imageInput.setCustomValidity(``);
+  }
+  imageInput.reportValidity();
+};
+
+const checkFormAvatar = () => {
+  checkImageFile(adFormAvatar);
+};
+
+const checkFormImages = () => {
+  checkImageFile(adFormImages);
+};
+
 const announcementsList = [];
 
 for (let i = 0; i < OBJECTS_NUMBER; i++) {
   announcementsList.push(generateAnnouncement(i));
 }
 
-const map = document.querySelector(`.map`);
-map.classList.remove(`map--faded`);
-
-const pinTemplate = document.querySelector(`#pin`).content.querySelector(`button`);
+/* const pinTemplate = document.querySelector(`#pin`).content.querySelector(`button`);
 const fragmentPins = document.createDocumentFragment();
 const cardTemplate = document.querySelector(`#card`).content.querySelector(`article`);
 const fragmnetCards = document.createDocumentFragment();
@@ -173,9 +315,26 @@ for (const announcement of announcementsList) {
   const popupAvatar = card.querySelector(`.popup__avatar`);
   popupAvatar.src = announcement.author.avatar;
   fragmnetCards.appendChild(card);
-}
+}*/
 
 const mapPins = map.querySelector(`.map__pins`);
-mapPins.appendChild(fragmentPins);
+/* mapPins.appendChild(fragmentPins);
 const mapFiltersContainer = map.querySelector(`.map__filters-container`);
-map.insertBefore(fragmnetCards, mapFiltersContainer);
+map.insertBefore(fragmnetCards, mapFiltersContainer);*/
+makeDisableStatus();
+const mapPinMain = mapPins.querySelector(`.map__pin--main`);
+mapPinMain.addEventListener(`mousedown`, onMainPinMousedownLeft);
+mapPinMain.addEventListener(`keydown`, onMainPinKeydownEnter);
+const adFormAddress = adForm.querySelector(`#address`);
+
+adFormAddress.value = getPosition(mapPinMain);
+
+adFormRoomsNumber.addEventListener(`input`, checkGuestsNumber);
+adFormCapacity.addEventListener(`input`, checkGuestsNumber);
+adFormTitle.addEventListener(`input`, checkTitle);
+adFormType.addEventListener(`input`, checkPrice);
+adFormPrice.addEventListener(`input`, checkPrice);
+adFormTimein.addEventListener(`input`, syncTimeout);
+adFormTimeout.addEventListener(`input`, syncTimein);
+adFormAvatar.addEventListener(`input`, checkFormAvatar);
+adFormImages.addEventListener(`input`, checkFormImages);
