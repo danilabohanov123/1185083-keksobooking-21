@@ -2,24 +2,15 @@
 
 (() => {
   const isKeyEscape = (evt) => {
-    if (evt.key === `Escape`) {
-      return true;
-    }
-    return false;
+    return evt.key === `Escape`;
   };
 
   const isKeyEnter = (evt) => {
-    if (evt.key === `Enter`) {
-      return true;
-    }
-    return false;
+    return evt.key === `Enter`;
   };
 
   const isMousedownLeft = (evt) => {
-    if (evt.which === 1) {
-      return true;
-    }
-    return false;
+    return evt.which === 1;
   };
 
   const generateRandomInteger = (minNumber, maxNumber) => {
