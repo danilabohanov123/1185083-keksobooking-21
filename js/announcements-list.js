@@ -1,6 +1,9 @@
 "use strict";
 
 (() => {
+  const announcementsList = [];
+  const listIndexes = [];
+
   const shuffleList = (itemsList) => {
     const usedIndexes = [];
     for (let i = 0; i < itemsList.length; i++) {
@@ -23,8 +26,7 @@
     return shuffledItemsList;
   };
 
-  const listIndexes = [];
-  for (let i = 1; i <= window.data.AD_NUMBER; i++) {
+  for (let i = 1; i <= window.main.ADS_COUNT; i++) {
     listIndexes.push(i);
   }
 
@@ -37,8 +39,8 @@
   };
 
   const generateTypes = () => {
-    const typeInd = window.util.generateRandomInteger(0, window.data.hotelTypes.length - 1);
-    return window.data.hotelTypes[typeInd];
+    const typeInd = window.util.generateRandomInteger(0, window.main.hotelTypes.length - 1);
+    return window.main.hotelTypes[typeInd];
   };
 
   const generateAccommodationOfGuests = () => {
@@ -52,11 +54,11 @@
   };
 
   const generateCheckin = () => {
-    return window.data.hotelTimes[window.util.generateRandomInteger(0, window.data.hotelTimes.length - 1)];
+    return window.main.hotelTimes[window.util.generateRandomInteger(0, window.main.hotelTimes.length - 1)];
   };
 
   const generateCheckout = () => {
-    return window.data.hotelTimes[window.util.generateRandomInteger(0, window.data.hotelTimes.length - 1)];
+    return window.main.hotelTimes[window.util.generateRandomInteger(0, window.main.hotelTimes.length - 1)];
   };
 
   const generateRandomSubarray = (arrayItems) => {
@@ -66,11 +68,11 @@
   };
 
   const generateFeatures = () => {
-    return generateRandomSubarray(window.data.hotelFeatures);
+    return generateRandomSubarray(window.main.hotelFeatures);
   };
 
   const generatePhotos = () => {
-    const RandomSubarrayPhotos = generateRandomSubarray(window.data.hotelPhotos);
+    const RandomSubarrayPhotos = generateRandomSubarray(window.main.hotelPhotos);
     for (let i = 0; i < RandomSubarrayPhotos.length; i++) {
       RandomSubarrayPhotos[i] = `http://o0.github.io/assets/images/tokyo/hotel` + RandomSubarrayPhotos[i] + `.jpg`;
     }
@@ -92,9 +94,7 @@
     return {author: author, offer: offer, location: location};
   };
 
-  const announcementsList = [];
-
-  for (let i = 0; i < window.data.AD_NUMBER; i++) {
+  for (let i = 0; i < window.main.ADS_COUNT; i++) {
     announcementsList.push(generateAnnouncement(i));
   }
 
