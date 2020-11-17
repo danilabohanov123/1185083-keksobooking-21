@@ -5,46 +5,39 @@
     const errorMessage = document.createElement(`section`);
     const errorMessageTitle = document.createElement(`h2`);
     errorMessageTitle.textContent = message;
-    errorMessageTitle.style.fontSize = `50px`;
     errorMessage.appendChild(errorMessageTitle);
-    errorMessage.style.zIndex = 50;
-    errorMessage.style.position = `fixed`;
-    errorMessage.style.top = 0;
-    errorMessage.style.right = 0;
-    errorMessage.style.bottom = 0;
-    errorMessage.style.left = 0;
-    errorMessage.style.margin = `auto`;
-    errorMessage.style.backgroundColor = `#fff`;
-    errorMessage.style.padding = `30px`;
     window.main.body.insertBefore(errorMessage, window.main.body.querySelector(`#card`));
     window.main.body.removeChild(window.main.body.querySelector(`main`));
     window.main.body.removeChild(window.main.body.querySelector(`footer`));
   };
 
   const onSuccess = (message) => {
-    window.load.announcementsList = message;
-    window.map.renderPins();
+    window.download.announcements = message;
+    window.main.isDataDownload = true;
+    window.mode.enableFormFieldsets(window.main.mapFiltersFieldsets);
+    window.mode.enableFormFieldsets(window.main.mapFiltersSelects);
+    window.filter.rerenderPins();
   };
 
   const makeRequest = (url) => {
-    var xhr = new XMLHttpRequest();
+    const xhr = new XMLHttpRequest();
 
     xhr.responseType = `json`;
 
     xhr.addEventListener(`load`, () => {
-      var error;
+      let error;
       switch (xhr.status) {
-        case 200:
-          window.load.onSuccess(xhr.response);
+        case window.main.Statuses.OK:
+          window.download.onSuccess(xhr.response);
           break;
 
-        case 400:
+        case window.main.Statuses.BAD_REQUEST:
           error = `Неверный запрос`;
           break;
-        case 401:
+        case window.main.Statuses.UNAUTHORIZED:
           error = `Пользователь не авторизован`;
           break;
-        case 404:
+        case window.main.Statuses.NOT_FOUND:
           error = `Ничего не найдено`;
           break;
 
@@ -53,30 +46,30 @@
       }
 
       if (error) {
-        window.load.onError(error);
+        window.download.onError(error);
       }
     });
 
     xhr.addEventListener(`error`, () => {
-      window.load.onError(`Произошла ошибка соединения`);
+      window.download.onError(`Произошла ошибка соединения`);
     });
 
     xhr.addEventListener(`timeout`, () => {
-      window.load.onError(`Запрос не успел выполниться за ` + xhr.timeout + `мс. Проверьте интернет соединение или перезагрузите страницу`);
+      window.download.onError(`Запрос не успел выполниться за ` + xhr.timeout + `мс. Проверьте интернет соединение или перезагрузите страницу`);
     });
 
-    xhr.timeout = 10000;
+    xhr.timeout = window.main.REQUEST_TIMEOUT;
 
     xhr.open(`GET`, url);
     xhr.send();
   };
 
-  window.load = {
+  window.download = {
     makeRequest: makeRequest,
     onError: onError,
     onSuccess: onSuccess,
-    announcementsList: []
+    announcements: []
   };
 
-  window.load.makeRequest(window.main.URL);
+  window.download.makeRequest(window.main.Urls.DOWNLOAD);
 })();

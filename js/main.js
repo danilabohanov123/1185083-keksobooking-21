@@ -1,25 +1,60 @@
 "use strict";
 
 (() => {
-  const ADS_COUNT = 10;
   const MAIN_PIN_TRIANGLE_HEIGHT = 22;
-  const MAIN_PIN_MIN_Y = 130;
-  const MAIN_PIN_MAX_Y = 600;
-  const URL = `https://21.javascript.pages.academy/keksobooking/data`;
+  const MAX_HOUSING_PRICE = 1000000;
+  const REQUEST_TIMEOUT = 10000;
+  const DEBOUNCE_TIMEOUT = 500;
+  const PINS_LIMIT = 5;
+  const DEFAULT_INPUT_VALUE = `any`;
+  const INFINITY = 2000000000;
+  const BASE = 10;
+
+  const MainPinY = {
+    MIN: 130,
+    MAX: 600
+  };
+
+  const Statuses = {
+    OK: 200,
+    BAD_REQUEST: 400,
+    UNAUTHORIZED: 401,
+    NOT_FOUND: 404
+  };
+
+  const Urls = {
+    DOWNLOAD: `https://21.javascript.pages.academy/keksobooking/data`,
+    UPLOAD: `https://21.javascript.pages.academy/keksobooking`
+  };
+
+  const IsCorrectInput = {
+    title: false,
+    capacity: true,
+    price: false,
+    avatar: true,
+    images: true
+  };
+
+  const SortingParameters = {
+    type: DEFAULT_INPUT_VALUE,
+    minPrice: 0,
+    maxPrice: 0,
+    roomsNumber: DEFAULT_INPUT_VALUE,
+    guestsNumber: DEFAULT_INPUT_VALUE,
+    features: []
+  };
+
   const hotelTypes = [`palace`, `flat`, `house`, `bungalow`];
   const minPrices = [10000, 1000, 5000, 0];
-  const hotelFeatures = [`wifi`, `dishwasher`, `parking`, `washer`, `elevator`, `conditioner`];
-  const hotelPhotos = [1, 2, 3];
-  const hotelTimes = [`12:00`, `13:00`, `14:00`];
 
-  const EnglisHousingToRussian = {
+  const EnglishHousingToRussian = {
     flat: `Квартира`,
     bungalow: `Бунгало`,
     house: `Дом`,
     palace: `Дворец`
   };
 
-  const EnglisfeatureToRussian = {
+  const EnglishFeatureToRussian = {
     wifi: `вай-фай`,
     dishwasher: `посудомойка`,
     parking: `парковка`,
@@ -28,14 +63,19 @@
     conditioner: `кондиционер`
   };
 
-  let isEnableStatus = false;
   const body = document.querySelector(`body`);
-  const adForm = body.querySelector(`.ad-form`);
+  const main = body.querySelector(`main`);
+  const adForm = main.querySelector(`.ad-form`);
   const adFormFieldsets = adForm.querySelectorAll(`fieldset`);
-  const map = body.querySelector(`.map`);
+  const map = main.querySelector(`.map`);
   const mapFilters = map.querySelector(`.map__filters`);
   const mapFiltersFieldsets = mapFilters.querySelectorAll(`fieldset`);
   const mapFiltersSelects = mapFilters.querySelectorAll(`select`);
+  const mapFiltersType = mapFilters.querySelector(`#housing-type`);
+  const mapFiltersPrice = mapFilters.querySelector(`#housing-price`);
+  const mapFiltersRooms = mapFilters.querySelector(`#housing-rooms`);
+  const mapFiltersGuests = mapFilters.querySelector(`#housing-guests`);
+  const mapFiltersFeatures = mapFilters.querySelectorAll(`.map__checkbox`);
   const pinTemplate = body.querySelector(`#pin`).content.querySelector(`button`);
   const fragmentPins = document.createDocumentFragment();
   const cardTemplate = body.querySelector(`#card`).content.querySelector(`article`);
@@ -52,9 +92,16 @@
   const adFormTimeout = adForm.querySelector(`#timeout`);
   const adFormAvatar = adForm.querySelector(`#avatar`);
   const adFormImages = adForm.querySelector(`#images`);
+  const adFromSubmit = adForm.querySelector(`.ad-form__submit`);
+  const adFormDescription = adForm.querySelector(`#description`);
+  const adFormFeatures = adForm.querySelectorAll(`.feature__checkbox`);
+  const adFormReset = adForm.querySelector(`.ad-form__reset`);
+  const successMessageTemplate = body.querySelector(`#success`).content.querySelector(`div`);
+  const errorMessageTemplate = body.querySelector(`#error`).content.querySelector(`div`);
 
   window.main = {
     body: body,
+    main: main,
     adForm: adForm,
     adFormFieldsets: adFormFieldsets,
     map: map,
@@ -68,7 +115,7 @@
     mapPins: mapPins,
     mapPinMain: mapPinMain,
     adFormAddress: adFormAddress,
-    isEnableStatus: isEnableStatus,
+    isEnableStatus: false,
     adFormTitle: adFormTitle,
     adFormRoomsNumber: adFormRoomsNumber,
     adFormCapacity: adFormCapacity,
@@ -78,17 +125,36 @@
     adFormTimeout: adFormTimeout,
     adFormAvatar: adFormAvatar,
     adFormImages: adFormImages,
-    ADS_COUNT: ADS_COUNT,
+    adFormDescription: adFormDescription,
     hotelTypes: hotelTypes,
-    hotelFeatures: hotelFeatures,
-    hotelPhotos: hotelPhotos,
-    hotelTimes: hotelTimes,
-    EnglisHousingToRussian: EnglisHousingToRussian,
-    EnglisfeatureToRussian: EnglisfeatureToRussian,
+    EnglishHousingToRussian: EnglishHousingToRussian,
+    EnglishFeatureToRussian: EnglishFeatureToRussian,
     minPrices: minPrices,
     MAIN_PIN_TRIANGLE_HEIGHT: MAIN_PIN_TRIANGLE_HEIGHT,
-    MAIN_PIN_MIN_Y: MAIN_PIN_MIN_Y,
-    MAIN_PIN_MAX_Y: MAIN_PIN_MAX_Y,
-    URL: URL
+    MainPinY: MainPinY,
+    MAX_HOUSING_PRICE: MAX_HOUSING_PRICE,
+    Urls: Urls,
+    card: undefined,
+    adFromSubmit: adFromSubmit,
+    IsCorrectInput: IsCorrectInput,
+    adFormFeatures: adFormFeatures,
+    adFormReset: adFormReset,
+    successMessageTemplate: successMessageTemplate,
+    errorMessageTemplate: errorMessageTemplate,
+    mapFiltersType: mapFiltersType,
+    mapFiltersPrice: mapFiltersPrice,
+    mapFiltersRooms: mapFiltersRooms,
+    mapFiltersGuests: mapFiltersGuests,
+    mapFiltersFeatures: mapFiltersFeatures,
+    isDataDownload: false,
+    SortingParameters: SortingParameters,
+    similarAnnouncements: undefined,
+    Statuses: Statuses,
+    REQUEST_TIMEOUT: REQUEST_TIMEOUT,
+    DEBOUNCE_TIMEOUT: DEBOUNCE_TIMEOUT,
+    DEFAULT_INPUT_VALUE: DEFAULT_INPUT_VALUE,
+    PINS_LIMIT: PINS_LIMIT,
+    INFINITY: INFINITY,
+    BASE: BASE
   };
 })();
