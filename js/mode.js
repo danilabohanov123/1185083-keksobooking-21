@@ -102,13 +102,13 @@
 
   const recalculatePinPositionY = (lastPositionY, shiftY) => {
     return Math.round(Math.min(Math.max((lastPositionY - shiftY), window.main.MainPinY.MIN -
-    (window.main.MAIN_PIN_DIAMETER / 2 + window.main.MAIN_PIN_TRIANGLE_HEIGHT)),
-    window.main.MainPinY.MAX - (window.main.MAIN_PIN_DIAMETER / 2 + window.main.MAIN_PIN_TRIANGLE_HEIGHT))) + `px`;
+    (window.main.MAIN_PIN_DIAMETER + window.main.MAIN_PIN_TRIANGLE_HEIGHT)),
+    window.main.MainPinY.MAX - (window.main.MAIN_PIN_DIAMETER + window.main.MAIN_PIN_TRIANGLE_HEIGHT))) + `px`;
   };
 
   const recalculateAdressValue = () => {
     window.main.adFormAddress.value = Math.round(window.main.mapPinMain.offsetLeft + window.main.MAIN_PIN_DIAMETER / 2) + `, ` +
-      Math.round(window.main.mapPinMain.offsetTop + window.main.MAIN_PIN_DIAMETER / 2 + window.main.MAIN_PIN_TRIANGLE_HEIGHT);
+      (window.main.mapPinMain.offsetTop + window.main.MAIN_PIN_DIAMETER + window.main.MAIN_PIN_TRIANGLE_HEIGHT);
   };
 
   const onMainPinMousedown = (evt) => {
