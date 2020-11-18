@@ -27,6 +27,7 @@
     window.main.adFormTitle.value = ``;
     window.main.adFormType.value = window.main.hotelTypes[1];
     window.main.adFormPrice.value = ``;
+    window.main.adFormPrice.placeholder = window.main.DEFUALT_PLACEHOLDER_VALUE;
     window.main.adFormRoomsNumber.value = 1;
     window.main.adFormCapacity.value = 1;
     window.main.adFormDescription.value = ``;
@@ -52,8 +53,8 @@
   };
 
   const resetPinPosition = () => {
-    window.main.mapPinMain.style.left = Math.round((window.main.map.offsetWidth - window.main.mapPinMain.offsetWidth) / 2) + `px`;
-    window.main.mapPinMain.style.top = Math.round((window.main.map.offsetHeight - window.main.mapPinMain.offsetHeight) / 2) + `px`;
+    window.main.mapPinMain.style.left = Math.round((window.main.map.offsetWidth - window.main.MAIN_PIN_DIAMETER) / 2) + `px`;
+    window.main.mapPinMain.style.top = Math.round((window.main.map.offsetHeight - window.main.MAIN_PIN_DIAMETER) / 2) + `px`;
     window.main.adFormAddress.value = Math.round(window.main.map.offsetWidth / 2) + `, ` + Math.round(window.main.map.offsetHeight / 2);
   };
 
@@ -94,20 +95,20 @@
     }
   };
 
-  const recalculatePinPositionX = (lastPositionX, shiftX, pinWidth, mapWidth) => {
-    return Math.round(Math.min(Math.max((lastPositionX - shiftX), -pinWidth / 2),
-        mapWidth - pinWidth / 2)) + `px`;
+  const recalculatePinPositionX = (lastPositionX, shiftX, mapWidth) => {
+    return Math.round(Math.min(Math.max((lastPositionX - shiftX), -window.main.MAIN_PIN_DIAMETER / 2),
+        mapWidth - window.main.MAIN_PIN_DIAMETER / 2)) + `px`;
   };
 
-  const recalculatePinPositionY = (lastPositionY, shiftY, pinHeight) => {
+  const recalculatePinPositionY = (lastPositionY, shiftY) => {
     return Math.round(Math.min(Math.max((lastPositionY - shiftY), window.main.MainPinY.MIN -
-    (pinHeight / 2 + window.main.MAIN_PIN_TRIANGLE_HEIGHT)),
-    window.main.MainPinY.MAX - (pinHeight / 2 + window.main.MAIN_PIN_TRIANGLE_HEIGHT))) + `px`;
+    (window.main.MAIN_PIN_DIAMETER / 2 + window.main.MAIN_PIN_TRIANGLE_HEIGHT)),
+    window.main.MainPinY.MAX - (window.main.MAIN_PIN_DIAMETER / 2 + window.main.MAIN_PIN_TRIANGLE_HEIGHT))) + `px`;
   };
 
   const recalculateAdressValue = () => {
-    window.main.adFormAddress.value = Math.floor(window.main.mapPinMain.offsetLeft + window.main.mapPinMain.offsetWidth / 2) + `, ` +
-      Math.floor(window.main.mapPinMain.offsetTop + window.main.mapPinMain.offsetHeight / 2 + window.main.MAIN_PIN_TRIANGLE_HEIGHT);
+    window.main.adFormAddress.value = Math.round(window.main.mapPinMain.offsetLeft + window.main.MAIN_PIN_DIAMETER / 2) + `, ` +
+      Math.round(window.main.mapPinMain.offsetTop + window.main.MAIN_PIN_DIAMETER / 2 + window.main.MAIN_PIN_TRIANGLE_HEIGHT);
   };
 
   const onMainPinMousedown = (evt) => {
@@ -137,10 +138,8 @@
         startCoords.x = moveEvt.clientX;
         startCoords.y = moveEvt.clientY;
 
-        window.main.mapPinMain.style.top = window.mode.recalculatePinPositionY(window.main.mapPinMain.offsetTop, shift.y,
-            window.main.mapPinMain.offsetHeight);
-        window.main.mapPinMain.style.left = window.mode.recalculatePinPositionX(window.main.mapPinMain.offsetLeft, shift.x,
-            window.main.mapPinMain.offsetWidth, window.main.map.offsetWidth);
+        window.main.mapPinMain.style.top = window.mode.recalculatePinPositionY(window.main.mapPinMain.offsetTop, shift.y);
+        window.main.mapPinMain.style.left = window.mode.recalculatePinPositionX(window.main.mapPinMain.offsetLeft, shift.x, window.main.map.offsetWidth);
         window.mode.recalculateAdressValue();
       };
 
