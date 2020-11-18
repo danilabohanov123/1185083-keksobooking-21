@@ -65,9 +65,11 @@
   };
 
   const rerenderPins = window.util.debounce(function () {
-    window.filter.getSimilarAds();
-    window.map.deletePins();
-    window.map.renderPins();
+    if (window.main.isDataDownload) {
+      window.filter.getSimilarAds();
+      window.map.deletePins();
+      window.map.renderPins();
+    }
   });
 
   window.filter = {
@@ -78,42 +80,42 @@
 
   window.main.mapFiltersType.addEventListener(`input`, () => {
     window.main.SortingParameters.type = window.main.mapFiltersType.value;
-    if (window.main.isDataDownload) {
-      window.filter.rerenderPins();
-    }
+    window.filter.rerenderPins();
   });
 
   window.main.mapFiltersPrice.addEventListener(`input`, () => {
     if (window.main.mapFiltersPrice.value === window.main.DEFAULT_INPUT_VALUE) {
-      window.main.SortingParameters.minPrice = 0;
-      window.main.SortingParameters.maxPrice = 2000000000;
-    } else if (window.main.mapFiltersPrice.value === `middle`) {
-      window.main.SortingParameters.minPrice = 10000;
-      window.main.SortingParameters.maxPrice = 50000;
-    } else if (window.main.mapFiltersPrice.value === `low`) {
-      window.main.SortingParameters.minPrice = 0;
-      window.main.SortingParameters.maxPrice = 9999;
-    } else {
-      window.main.SortingParameters.minPrice = 50001;
-      window.main.SortingParameters.maxPrice = 2000000000;
-    }
-    if (window.main.isDataDownload) {
+      window.main.SortingParameters.minPrice = window.main.pricePoints[0];
+      window.main.SortingParameters.maxPrice = window.main.INFINITY;
       window.filter.rerenderPins();
+      return;
     }
+    if (window.main.mapFiltersPrice.value === window.main.priceLevels[1]) {
+      window.main.SortingParameters.minPrice = window.main.pricePoints[1];
+      window.main.SortingParameters.maxPrice = window.main.pricePoints[2];
+      window.filter.rerenderPins();
+      return;
+    }
+    if (window.main.mapFiltersPrice.value === window.main.priceLevels[0]) {
+      window.main.SortingParameters.minPrice = window.main.pricePoints[0];
+      window.main.SortingParameters.maxPrice = window.main.pricePoints[1] - 1;
+      window.filter.rerenderPins();
+      return;
+    }
+    window.main.SortingParameters.minPrice = window.main.pricePoints[2] + 1;
+    window.main.SortingParameters.maxPrice = window.main.INFINITY;
+    window.filter.rerenderPins();
+    return;
   });
 
   window.main.mapFiltersRooms.addEventListener(`input`, () => {
     window.main.SortingParameters.roomsNumber = window.main.mapFiltersRooms.value;
-    if (window.main.isDataDownload) {
-      window.filter.rerenderPins();
-    }
+    window.filter.rerenderPins();
   });
 
   window.main.mapFiltersGuests.addEventListener(`input`, () => {
     window.main.SortingParameters.guestsNumber = window.main.mapFiltersGuests.value;
-    if (window.main.isDataDownload) {
-      window.filter.rerenderPins();
-    }
+    window.filter.rerenderPins();
   });
 
   for (const feature of window.main.mapFiltersFeatures) {
@@ -124,9 +126,7 @@
           window.main.SortingParameters.features.push(filterCheckbox.value);
         }
       }
-      if (window.main.isDataDownload) {
-        window.filter.rerenderPins();
-      }
+      window.filter.rerenderPins();
     });
   }
 })();

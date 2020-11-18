@@ -11,7 +11,7 @@
     xhr.addEventListener(`load`, () => {
       onSuccess();
       switch (xhr.status) {
-        case window.main.Statuses.OK:
+        case window.main.StatusCode.OK:
           onSuccess();
           break;
 

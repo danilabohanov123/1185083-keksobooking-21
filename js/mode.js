@@ -14,6 +14,11 @@
   };
 
   const resetInputs = () => {
+    if (window.main.isPhotoInsert) {
+      window.housingPhoto.remove();
+      window.main.isPhotoInsert = false;
+    }
+    window.main.avatarPreview.src = window.main.KEKS_IMAGE_PATH;
     window.main.IsCorrectInput.title = false;
     window.main.IsCorrectInput.capacity = true;
     window.main.IsCorrectInput.price = false;
@@ -61,8 +66,6 @@
     window.mode.disableFormFieldsets(window.main.mapFiltersSelects);
     window.mode.resetInputs();
     window.mode.resetSortingParameters();
-    window.main.mapPinMain.removeEventListener(`mousedown`, window.mode.onMainPinMousedown);
-    window.main.mapPinMain.addEventListener(`mousedown`, window.mode.onMainPinMousedownLeft);
     window.main.mapPinMain.addEventListener(`keydown`, window.mode.onMainPinKeydownEnter);
     if (window.mode.isPinsdDrawn) {
       window.map.deletePins();
@@ -91,17 +94,6 @@
     }
   };
 
-  const onMainPinMousedownLeft = function (evt) {
-    if (window.util.isMousedownLeft(evt) && !window.main.isEnableStatus) {
-      window.mode.makeEnableStatus();
-      window.mode.recalculateAdressValue();
-      window.main.isEnableStatus = true;
-      window.main.mapPinMain.removeEventListener(`mousedown`, window.mode.onMainPinMousedownLeft, false);
-      window.main.mapPinMain.removeEventListener(`keydown`, window.mode.onMainPinKeydownEnter, false);
-      window.main.mapPinMain.addEventListener(`mousedown`, window.mode.onMainPinMousedown);
-    }
-  };
-
   const recalculatePinPositionX = (lastPositionX, shiftX, pinWidth, mapWidth) => {
     return Math.round(Math.min(Math.max((lastPositionX - shiftX), -pinWidth / 2),
         mapWidth - pinWidth / 2)) + `px`;
@@ -120,6 +112,12 @@
 
   const onMainPinMousedown = (evt) => {
     if (window.util.isMousedownLeft(evt)) {
+      if (!window.main.isEnableStatus) {
+        window.mode.makeEnableStatus();
+        window.mode.recalculateAdressValue();
+        window.main.isEnableStatus = true;
+        window.main.mapPinMain.removeEventListener(`keydown`, window.mode.onMainPinKeydownEnter, false);
+      }
       const startCoords = {
         x: evt.clientX,
         y: evt.clientY
@@ -171,9 +169,7 @@
       window.mode.makeEnableStatus();
       window.mode.recalculateAdressValue();
       window.main.isEnableStatus = true;
-      window.main.mapPinMain.removeEventListener(`mousedown`, window.mode.onMainPinMousedownLeft, false);
       window.main.mapPinMain.removeEventListener(`keydown`, window.mode.onMainPinKeydownEnter, false);
-      window.main.mapPinMain.addEventListener(`mousedown`, window.mode.onMainPinMousedown);
     }
   };
 
@@ -182,7 +178,6 @@
     makeDisableStatus: makeDisableStatus,
     enableFormFieldsets: enableFormFieldsets,
     makeEnableStatus: makeEnableStatus,
-    onMainPinMousedownLeft: onMainPinMousedownLeft,
     onMainPinKeydownEnter: onMainPinKeydownEnter,
     onMainPinMousedown: onMainPinMousedown,
     recalculatePinPositionX: recalculatePinPositionX,
@@ -196,6 +191,7 @@
   };
 
   window.mode.makeDisableStatus();
+  window.main.mapPinMain.addEventListener(`mousedown`, window.mode.onMainPinMousedown);
 
   window.main.adFormReset.addEventListener(`click`, (evt) => {
     evt.preventDefault();

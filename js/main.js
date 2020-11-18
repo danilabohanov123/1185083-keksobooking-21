@@ -15,7 +15,12 @@
     MAX: 600
   };
 
-  const Statuses = {
+  const FileFormat = {
+    JPG: `jpg`,
+    PNG: `png`
+  };
+
+  const StatusCode = {
     OK: 200,
     BAD_REQUEST: 400,
     UNAUTHORIZED: 401,
@@ -46,6 +51,8 @@
 
   const hotelTypes = [`palace`, `flat`, `house`, `bungalow`];
   const minPrices = [10000, 1000, 5000, 0];
+  const pricePoints = [0, 10000, 50000];
+  const priceLevels = [`low`, `middle`];
 
   const EnglishHousingToRussian = {
     flat: `Квартира`,
@@ -54,13 +61,9 @@
     palace: `Дворец`
   };
 
-  const EnglishFeatureToRussian = {
-    wifi: `вай-фай`,
-    dishwasher: `посудомойка`,
-    parking: `парковка`,
-    washer: `стиральная машина`,
-    elevator: `лифт`,
-    conditioner: `кондиционер`
+  const TitleLength = {
+    MIN: 30,
+    MAX: 100
   };
 
   const body = document.querySelector(`body`);
@@ -96,6 +99,9 @@
   const adFormDescription = adForm.querySelector(`#description`);
   const adFormFeatures = adForm.querySelectorAll(`.feature__checkbox`);
   const adFormReset = adForm.querySelector(`.ad-form__reset`);
+  const adFormPhoto = adForm.querySelector(`.ad-form__photo`);
+  const avatarPreview = adForm.querySelector(`.ad-form-header__preview`).querySelector(`img`);
+  const housingPhoto = avatarPreview.cloneNode(true);
   const successMessageTemplate = body.querySelector(`#success`).content.querySelector(`div`);
   const errorMessageTemplate = body.querySelector(`#error`).content.querySelector(`div`);
 
@@ -128,7 +134,6 @@
     adFormDescription: adFormDescription,
     hotelTypes: hotelTypes,
     EnglishHousingToRussian: EnglishHousingToRussian,
-    EnglishFeatureToRussian: EnglishFeatureToRussian,
     minPrices: minPrices,
     MAIN_PIN_TRIANGLE_HEIGHT: MAIN_PIN_TRIANGLE_HEIGHT,
     MainPinY: MainPinY,
@@ -147,14 +152,23 @@
     mapFiltersGuests: mapFiltersGuests,
     mapFiltersFeatures: mapFiltersFeatures,
     isDataDownload: false,
+    isPhotoInsert: false,
     SortingParameters: SortingParameters,
     similarAnnouncements: undefined,
-    Statuses: Statuses,
+    StatusCode: StatusCode,
     REQUEST_TIMEOUT: REQUEST_TIMEOUT,
     DEBOUNCE_TIMEOUT: DEBOUNCE_TIMEOUT,
     DEFAULT_INPUT_VALUE: DEFAULT_INPUT_VALUE,
     PINS_LIMIT: PINS_LIMIT,
     INFINITY: INFINITY,
-    BASE: BASE
+    BASE: BASE,
+    pricePoints: pricePoints,
+    priceLevels: priceLevels,
+    TitleLength: TitleLength,
+    FileFormat: FileFormat,
+    KEKS_IMAGE_PATH: `img/muffin-grey.svg`,
+    avatarPreview: avatarPreview,
+    adFormPhoto: adFormPhoto,
+    housingPhoto: housingPhoto
   };
 })();

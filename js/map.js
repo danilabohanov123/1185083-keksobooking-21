@@ -15,6 +15,24 @@
     }
   };
 
+  const renderPhotoes = (popupPhotos, offerPhotos) => {
+    if (offerPhotos.length) {
+      const popupPhoto = popupPhotos.querySelector(`.popup__photo`);
+      if (offerPhotos[0]) {
+        popupPhoto.src = offerPhotos[0];
+      }
+      for (let i = 1; i < offerPhotos.length; i++) {
+        if (offerPhotos[i]) {
+          const newPopupPhoto = popupPhoto.cloneNode(true);
+          newPopupPhoto.src = offerPhotos[i];
+          popupPhotos.appendChild(newPopupPhoto);
+        }
+      }
+      return;
+    }
+    popupPhotos.remove();
+  };
+
   const renderAdCard = (ind) => {
     const announcement = window.main.similarAnnouncements[ind];
     window.main.card = window.main.cardTemplate.cloneNode(true);
@@ -33,32 +51,33 @@
     popupTextTime.textContent = `Заезд после ` + announcement.offer.checkin +
       `, выезд до ` + announcement.offer.checkout;
     const popupFeatures = window.main.card.querySelector(`.popup__features`);
-    if (!announcement.offer.features.length) {
+    const features = {
+      wifi: popupFeatures.querySelector(`.popup__feature--wifi`),
+      dishwasher: popupFeatures.querySelector(`.popup__feature--dishwasher`),
+      parking: popupFeatures.querySelector(`.popup__feature--parking`),
+      washer: popupFeatures.querySelector(`.popup__feature--washer`),
+      elevator: popupFeatures.querySelector(`.popup__feature--elevator`),
+      conditioner: popupFeatures.querySelector(`.popup__feature--conditioner`)
+    };
+    const usedFeatures = {};
+    Object.keys(features).forEach((element) => {
+      usedFeatures[element] = false;
+    });
+    announcement.offer.features.forEach((element) => {
+      usedFeatures[element] = true;
+    });
+    Object.keys(usedFeatures).forEach((element) => {
+      if (!usedFeatures[element]) {
+        features[element].remove();
+      }
+    });
+    if (!popupFeatures.querySelector(`.popup__feature`)) {
       popupFeatures.remove();
-    } else {
-      popupFeatures.textContent = `Удобства: ` + window.main.EnglishFeatureToRussian[announcement.offer.features[0]];
-    }
-    for (let i = 1; i < announcement.offer.features.length; i++) {
-      popupFeatures.textContent += `, ` + window.main.EnglishFeatureToRussian[announcement.offer.features[i]];
     }
     const popupDescription = window.main.card.querySelector(`.popup__description`);
     popupDescription.textContent = announcement.offer.description;
     const popupPhotos = window.main.card.querySelector(`.popup__photos`);
-    if (announcement.offer.photos.length) {
-      const popupPhoto = popupPhotos.querySelector(`.popup__photo`);
-      if (announcement.offer.photos[0]) {
-        popupPhoto.src = announcement.offer.photos[0];
-      }
-      for (let i = 1; i < announcement.offer.photos.length; i++) {
-        if (announcement.offer.photos[i]) {
-          const newPopupPhoto = popupPhoto.cloneNode(true);
-          newPopupPhoto.src = announcement.offer.photos[i];
-          popupPhotos.appendChild(newPopupPhoto);
-        }
-      }
-    } else {
-      popupPhotos.remove();
-    }
+    window.map.renderPhotoes(popupPhotos, announcement.offer.photos);
     const popupAvatar = window.main.card.querySelector(`.popup__avatar`);
     popupAvatar.src = announcement.author.avatar;
     const popupClose = window.main.card.querySelector(`.popup__close`);
@@ -114,6 +133,7 @@
     renderAdCard: renderAdCard,
     renderPins: renderPins,
     deletePins: deletePins,
+    renderPhotoes: renderPhotoes,
     pins: [],
     activePin: undefined
   };

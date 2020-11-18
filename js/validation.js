@@ -18,13 +18,13 @@
   };
 
   const onTitleInput = () => {
-    if (window.main.adFormTitle.value.length < 30) {
+    if (window.main.adFormTitle.value.length < window.main.TitleLength.MIN) {
       window.main.IsCorrectInput.title = false;
       window.main.adFormTitle.setCustomValidity(`Слишком короткий заголовок`);
       window.main.adFormTitle.reportValidity();
       return;
     }
-    if (window.main.adFormTitle.value.length > 100) {
+    if (window.main.adFormTitle.value.length > window.main.TitleLength.MAX) {
       window.main.IsCorrectInput.title = false;
       window.main.adFormTitle.setCustomValidity(`Слишком длинный заголовок`);
       window.main.adFormTitle.reportValidity();
@@ -35,16 +35,24 @@
     window.main.adFormTitle.reportValidity();
   };
 
-  const onTypeInput = () => {
+  const changePlaceholder = () => {
     if (window.main.adFormType.value === window.main.hotelTypes[3]) {
       window.main.adFormPrice.placeholder = window.main.minPrices[3];
-    } else if (window.main.adFormType.value === window.main.hotelTypes[1]) {
-      window.main.adFormPrice.placeholder = window.main.minPrices[1];
-    } else if (window.main.adFormType.value === window.main.hotelTypes[2]) {
-      window.main.adFormPrice.placeholder = window.main.minPrices[2];
-    } else {
-      window.main.adFormPrice.placeholder = window.main.minPrices[0];
+      return;
     }
+    if (window.main.adFormType.value === window.main.hotelTypes[1]) {
+      window.main.adFormPrice.placeholder = window.main.minPrices[1];
+      return;
+    }
+    if (window.main.adFormType.value === window.main.hotelTypes[2]) {
+      window.main.adFormPrice.placeholder = window.main.minPrices[2];
+      return;
+    }
+    window.main.adFormPrice.placeholder = window.main.minPrices[0];
+  };
+
+  const onTypeInput = () => {
+    window.validation.changePlaceholder();
     if (window.main.adFormPrice.value > window.main.MAX_HOUSING_PRICE) {
       window.main.IsCorrectInput.price = false;
       window.main.adFormPrice.setCustomValidity(`Слишком большая цена для данного типа жилья`);
@@ -78,21 +86,37 @@
     window.main.adFormTimeout.value = window.main.adFormTimein.value;
   };
 
-  const checkImageFile = (imageInput) => {
-    const fileFormat = imageInput.value.split(`.`)[1];
-    let isValid;
-    if (imageInput.value && fileFormat !== `jpeg` && fileFormat !== `png`) {
-      isValid = false;
-      imageInput.setCustomValidity(`Неверный формат введённого изображения`);
-    } else {
-      isValid = true;
-      imageInput.setCustomValidity(``);
-    }
+  const changeImageInputFlag = (imageInput, isValid) => {
     if (imageInput.name === window.main.adFormAvatar.name) {
       window.main.IsCorrectInput.avatar = isValid;
-    } else {
-      window.main.IsCorrectInput.images = isValid;
+      return;
     }
+    window.main.IsCorrectInput.images = isValid;
+  };
+
+  const renderPreview = (imageInput) => {
+    if (imageInput.name === window.main.adFormAvatar.name) {
+      window.main.avatarPreview.src = imageInput.value;
+      return;
+    }
+    if (!window.main.isPhotoInsert) {
+      window.main.isPhotoInsert = true;
+      window.main.adFormPhoto.appendChild(window.main.housingPhoto);
+    }
+    window.main.housingPhoto.src = imageInput.value;
+  };
+
+  const checkImageFile = (imageInput) => {
+    const fileName = imageInput.value.split(`.`);
+    if (fileName && (fileName.length === 1 || (fileName[1] !== window.main.FileFormat.JPG && fileName[1] !== window.main.FileFormat.PNG))) {
+      imageInput.setCustomValidity(`Неверный формат введённого изображения`);
+      window.validation.changeImageInputFlag(imageInput, false);
+      imageInput.reportValidity();
+      return;
+    }
+    imageInput.setCustomValidity(``);
+    window.validation.changeImageInputFlag(imageInput, true);
+    window.validation.renderPreview(imageInput);
     imageInput.reportValidity();
   };
 
@@ -122,7 +146,10 @@
     checkImageFile: checkImageFile,
     onAvatarInput: onAvatarInput,
     onImagesInput: onImagesInput,
-    checkAdFormInput: checkAdFormInput
+    checkAdFormInput: checkAdFormInput,
+    changePlaceholder: changePlaceholder,
+    changeImageInputFlag: changeImageInputFlag,
+    renderPreview: renderPreview
   };
 
   window.main.adFormRoomsNumber.addEventListener(`input`, window.validation.onRoomsNumberInput);

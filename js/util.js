@@ -13,10 +13,6 @@
     return evt.which === 1;
   };
 
-  const generateRandomInteger = (minNumber, maxNumber) => {
-    return minNumber + Math.round((Math.random() * (maxNumber - minNumber)));
-  };
-
   const debounce = function (cb) {
     let lastTimeout = null;
 
@@ -34,7 +30,6 @@
     isKeyEscape: isKeyEscape,
     isKeyEnter: isKeyEnter,
     isMousedownLeft: isMousedownLeft,
-    generateRandomInteger: generateRandomInteger,
     debounce: debounce
   };
 })();

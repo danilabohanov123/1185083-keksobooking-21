@@ -1,7 +1,7 @@
 "use strict";
 
 (() => {
-  const onError = (message) => {
+  const createErrorPopup = (message) => {
     const errorMessage = document.createElement(`section`);
     const errorMessageTitle = document.createElement(`h2`);
     errorMessageTitle.textContent = message;
@@ -11,12 +11,14 @@
     window.main.body.removeChild(window.main.body.querySelector(`footer`));
   };
 
-  const onSuccess = (message) => {
+  const createSuccessPopup = (message) => {
     window.download.announcements = message;
     window.main.isDataDownload = true;
-    window.mode.enableFormFieldsets(window.main.mapFiltersFieldsets);
-    window.mode.enableFormFieldsets(window.main.mapFiltersSelects);
-    window.filter.rerenderPins();
+    if (window.main.isEnableStatus) {
+      window.mode.enableFormFieldsets(window.main.mapFiltersFieldsets);
+      window.mode.enableFormFieldsets(window.main.mapFiltersSelects);
+      window.filter.rerenderPins();
+    }
   };
 
   const makeRequest = (url) => {
@@ -27,17 +29,17 @@
     xhr.addEventListener(`load`, () => {
       let error;
       switch (xhr.status) {
-        case window.main.Statuses.OK:
-          window.download.onSuccess(xhr.response);
+        case window.main.StatusCode.OK:
+          window.download.createSuccessPopup(xhr.response);
           break;
 
-        case window.main.Statuses.BAD_REQUEST:
+        case window.main.StatusCode.BAD_REQUEST:
           error = `Неверный запрос`;
           break;
-        case window.main.Statuses.UNAUTHORIZED:
+        case window.main.StatusCode.UNAUTHORIZED:
           error = `Пользователь не авторизован`;
           break;
-        case window.main.Statuses.NOT_FOUND:
+        case window.main.StatusCode.NOT_FOUND:
           error = `Ничего не найдено`;
           break;
 
@@ -46,16 +48,16 @@
       }
 
       if (error) {
-        window.download.onError(error);
+        window.download.createErrorPopup(error);
       }
     });
 
     xhr.addEventListener(`error`, () => {
-      window.download.onError(`Произошла ошибка соединения`);
+      window.download.createErrorPopup(`Произошла ошибка соединения`);
     });
 
     xhr.addEventListener(`timeout`, () => {
-      window.download.onError(`Запрос не успел выполниться за ` + xhr.timeout + `мс. Проверьте интернет соединение или перезагрузите страницу`);
+      window.download.createErrorPopup(`Запрос не успел выполниться за ` + xhr.timeout + `мс. Проверьте интернет соединение или перезагрузите страницу`);
     });
 
     xhr.timeout = window.main.REQUEST_TIMEOUT;
@@ -66,8 +68,8 @@
 
   window.download = {
     makeRequest: makeRequest,
-    onError: onError,
-    onSuccess: onSuccess,
+    createErrorPopup: createErrorPopup,
+    createSuccessPopup: createSuccessPopup,
     announcements: []
   };
 
